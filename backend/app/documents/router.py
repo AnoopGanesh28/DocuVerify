@@ -9,13 +9,14 @@ from db.vector_store import get_collection
 from core.security import get_current_user
 from models.user import User
 from models.document import Document
-from documents.schemas import DocumentResponse
+from documents.schemas import DocumentResponse, QueryRequest, QueryResponse
 from services.ingestion import (
     get_text_from_file,
     chunk_document,
     embed_chunks,
     store_chunks,
 )
+from services.rag_service import retrieve_context, call_ollama, format_response
 
 router = APIRouter()
 
@@ -92,3 +93,26 @@ def upload_document(
         # Clean up temp file
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+@router.post(
+    "/query",
+    response_model=QueryResponse,
+    summary="Query uploaded documents using RAG",
+)
+def query_documents(
+    request: QueryRequest,
+    current_user: User = Depends(get_current_user),
+):
+    # 1. Retrieve context
+    documents, metadatas = retrieve_context(request.question, current_user.id)
+    if not documents:
+        return QueryResponse(answer="I couldn't find any relevant documents to answer your question. Please upload some documents first.", sources=[])
+
+    # 2. Construct context string
+    context_str = "\n\n---\n\n".join(documents)
+
+    # 3. Call Ollama
+    answer = call_ollama(context_str, request.question)
+
+    # 4. Format response
+    return format_response(answer, metadatas)

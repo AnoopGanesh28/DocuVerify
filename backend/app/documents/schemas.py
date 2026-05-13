@@ -10,3 +10,15 @@ class DocumentResponse(BaseModel):
     upload_timestamp: datetime
 
     model_config = {"from_attributes": True}
+
+class QueryRequest(BaseModel):
+    question: str
+
+class Source(BaseModel):
+    document_id: int
+    filename: str
+    chunk_index: int
+
+class QueryResponse(BaseModel):
+    answer: str
+    sources: list[Source]
