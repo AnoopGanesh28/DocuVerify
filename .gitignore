@@ -1,1 +1,13 @@
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Project docs/context
 context.md
+implementation.md
