@@ -11,3 +11,13 @@ __pycache__/
 # Project docs/context
 context.md
 implementation.md
+
+# Database files
+*.db
+*.sqlite3
+
+# Vector Store
+chroma_data/
+
+# Temporary files
+temp_uploads/
